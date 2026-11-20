@@ -53,16 +53,28 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
     if (!formData.name.trim()) errs.name = 'Full name is required';
     if (!formData.phone.trim()) {
       errs.phone = 'Phone number is required';
-    } else if (!/^[0-9+ -]{8,15}$/.test(formData.phone.trim())) {
-      errs.phone = 'Enter a valid phone number';
+    } else if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
+      errs.phone = 'Please enter a valid 10-digit mobile number';
     }
     if (!formData.email.trim()) {
       errs.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errs.email = 'Enter a valid email address';
+    } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(formData.email.trim())) {
+      errs.email = 'Please enter a valid email address';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
+  };
+
+  const handlePhoneChange = (e) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+    if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+  };
+
+  const handleEmailChange = (e) => {
+    const lowerEmail = e.target.value.toLowerCase();
+    setFormData((prev) => ({ ...prev, email: lowerEmail }));
+    if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
   };
 
   const handleSubmit = (e) => {
@@ -206,15 +218,17 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
                   {/* Phone */}
                   <div>
                     <label className="block text-xs font-medium text-zinc-300 mb-1">
-                      Phone Number *
+                      Phone Number (10 Digits) *
                     </label>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
                       <input
                         type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+91 98765 43210"
+                        onChange={handlePhoneChange}
+                        placeholder="10-digit mobile number"
                         className={`w-full bg-zinc-900/90 border ${
                           errors.phone ? 'border-red-500' : 'border-zinc-800'
                         } rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#B6FF00]`}
@@ -228,18 +242,18 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
                   {/* Email */}
                   <div>
                     <label className="block text-xs font-medium text-zinc-300 mb-1">
-                      Email Address *
+                      Email Address (Small Letters Only) *
                     </label>
                     <div className="relative">
                       <Mail className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
                       <input
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={handleEmailChange}
                         placeholder="rohan@example.com"
                         className={`w-full bg-zinc-900/90 border ${
                           errors.email ? 'border-red-500' : 'border-zinc-800'
-                        } rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#B6FF00]`}
+                        } rounded-xl pl-9 pr-3 py-2.5 text-sm text-white lowercase placeholder-zinc-500 focus:outline-none focus:border-[#B6FF00]`}
                       />
                     </div>
                     {errors.email && <p className="text-[11px] text-red-400 mt-1">{errors.email}</p>}

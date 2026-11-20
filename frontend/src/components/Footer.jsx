@@ -250,10 +250,10 @@ export default function Footer({ onOpenJoinModal }) {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     placeholder="Enter your email"
                     required
-                    className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#B6FF00]"
+                    className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white lowercase placeholder-zinc-500 focus:outline-none focus:border-[#B6FF00]"
                   />
                   <button
                     type="submit"
