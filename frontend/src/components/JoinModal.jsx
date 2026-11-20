@@ -14,18 +14,28 @@ import {
 } from 'lucide-react';
 import { membershipPlans, gymInfo } from '../data/gymData';
 
+const initialFormState = {
+  name: '',
+  phone: '',
+  email: '',
+  goal: 'Muscle Building',
+  slot: 'Morning (6 AM - 9 AM)'
+};
+
 export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) {
   const [selectedPlan, setSelectedPlan] = useState('PREMIUM');
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    goal: 'Muscle Building',
-    slot: 'Morning (6 AM - 9 AM)'
-  });
+  const [formData, setFormData] = useState(initialFormState);
+  const [submittedData, setSubmittedData] = useState(null);
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [bookingId, setBookingId] = useState('');
+
+  const handleModalClose = () => {
+    setIsSubmitted(false);
+    setFormData(initialFormState);
+    setErrors({});
+    onClose();
+  };
 
   useEffect(() => {
     if (defaultPlan) {
@@ -33,6 +43,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
     }
     if (isOpen) {
       setIsSubmitted(false);
+      setFormData(initialFormState);
       setErrors({});
     }
   }, [defaultPlan, isOpen]);
@@ -41,12 +52,12 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        handleModalClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const validate = () => {
     const errs = {};
@@ -82,6 +93,10 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
     if (validate()) {
       const generatedId = 'TF-' + Math.floor(100000 + Math.random() * 900000);
       setBookingId(generatedId);
+      setSubmittedData({ ...formData, plan: selectedPlan });
+      // Reset form fields immediately so the form is completely empty
+      setFormData(initialFormState);
+      setErrors({});
       setIsSubmitted(true);
     }
   };
@@ -99,7 +114,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={handleModalClose}
         className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
       />
 
@@ -116,7 +131,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
 
           {/* Close button */}
           <button
-            onClick={onClose}
+            onClick={handleModalClose}
             className="absolute top-5 right-5 p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#B6FF00]/50 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
@@ -335,7 +350,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
               </h3>
               
               <p className="text-sm text-zinc-300 max-w-md mx-auto mb-6">
-                Congratulations <strong className="text-white">{formData.name}</strong>! Your registration for the <strong className="text-[#B6FF00]">{selectedPlan} Plan</strong> is confirmed.
+                Congratulations <strong className="text-white">{submittedData?.name || 'Athlete'}</strong>! Your registration for the <strong className="text-[#B6FF00]">{submittedData?.plan || selectedPlan} Plan</strong> is confirmed.
               </p>
 
               <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 max-w-md mx-auto mb-6 text-left text-xs space-y-2">
@@ -345,11 +360,11 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
                 </div>
                 <div className="flex justify-between border-b border-zinc-800 pb-2">
                   <span className="text-zinc-400">Plan Selected:</span>
-                  <span className="text-[#B6FF00] font-bold">{selectedPlan}</span>
+                  <span className="text-[#B6FF00] font-bold">{submittedData?.plan || selectedPlan}</span>
                 </div>
                 <div className="flex justify-between border-b border-zinc-800 pb-2">
                   <span className="text-zinc-400">Preferred Slot:</span>
-                  <span className="text-white">{formData.slot}</span>
+                  <span className="text-white">{submittedData?.slot || 'Morning'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Center Address:</span>
@@ -360,7 +375,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
               <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                 <a
                   href={`https://wa.me/${gymInfo.whatsapp.replace('+', '')}?text=${encodeURIComponent(
-                    `Hi Titan Forge Desk, I registered online with ID ${bookingId} for the ${selectedPlan} plan. My name is ${formData.name}.`
+                    `Hi Titan Forge Desk, I registered online with ID ${bookingId} for the ${submittedData?.plan || selectedPlan} plan. My name is ${submittedData?.name || ''}.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -369,7 +384,7 @@ export default function JoinModal({ isOpen, onClose, defaultPlan = 'PREMIUM' }) 
                   Confirm on WhatsApp
                 </a>
                 <button
-                  onClick={onClose}
+                  onClick={handleModalClose}
                   className="py-3 px-6 rounded-xl font-heading font-bold uppercase tracking-wider bg-zinc-800 hover:bg-zinc-700 text-white transition-all text-sm cursor-pointer"
                 >
                   Done

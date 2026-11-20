@@ -12,19 +12,22 @@ import {
   ExternalLink,
   MessageCircle,
   Sparkles,
-  Building
+  Building,
+  X
 } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 import { gymInfo } from '../data/gymData';
 
+const initialFormState = {
+  name: '',
+  phone: '',
+  email: '',
+  subject: 'Membership Inquiry',
+  message: ''
+};
+
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    subject: 'Membership Inquiry',
-    message: ''
-  });
+  const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,17 +70,19 @@ export default function Contact() {
     e.preventDefault();
     if (validate()) {
       setIsSubmitting(true);
+      // Immediately clear all input fields so the form becomes completely empty
+      setFormData(initialFormState);
+      setErrors({});
+
       setTimeout(() => {
         setIsSubmitting(false);
         setIsSubmitted(true);
-        setFormData({
-          name: '',
-          phone: '',
-          email: '',
-          subject: 'Membership Inquiry',
-          message: ''
-        });
-      }, 700);
+      }, 400);
+
+      // Auto-hide the success notification after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 5000);
     }
   };
 
@@ -294,17 +299,27 @@ export default function Contact() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mb-6 p-4 rounded-2xl bg-[#B6FF00]/10 border border-[#B6FF00] text-zinc-100 flex items-start gap-3"
+                  className="mb-6 p-4 rounded-2xl bg-[#B6FF00]/10 border border-[#B6FF00] text-zinc-100 flex items-start justify-between gap-3"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-[#B6FF00] shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-bold text-white uppercase font-heading">
-                      Message Successfully Sent!
-                    </h4>
-                    <p className="text-xs text-zinc-300 mt-0.5 leading-relaxed">
-                      Thank you! Your inquiry has reached our desk. A coordinator will reach out to you shortly.
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#B6FF00] shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase font-heading">
+                        Message Successfully Sent!
+                      </h4>
+                      <p className="text-xs text-zinc-300 mt-0.5 leading-relaxed">
+                        Thank you! Your inquiry has reached our desk. A coordinator will reach out to you shortly.
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsSubmitted(false)}
+                    className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Dismiss message"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
